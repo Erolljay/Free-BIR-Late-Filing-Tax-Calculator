@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIR Late Filing Calculator</title>
+    <!-- Inter Font for a modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --bg-gray: #f8fafc;
+            --text-dark: #1e293b;
+            --border-color: #e2e8f0;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--white);
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-weight: 600;
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        p.subtitle {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #eff6ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group input {
+            width: auto;
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .results {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .result-item.total {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            margin-top: 1rem;
+        }
+
+        .days-badge {
+            font-size: 0.75rem;
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>BIR Tax Calculator</h2>
+    <p class="subtitle">Late Filing & Penalty (EOPT Compliant)</p>
+
+    <div class="form-group">
+        <label>Tax Due Amount (PHP)</label>
+        <input type="number" id="taxDue" placeholder="0.00">
+    </div>
+
+    <div class="form-group">
+        <label>Due Date</label>
+        <input type="date" id="dueDate">
+    </div>
+
+    <div class="form-group">
+        <label>Date of Payment</label>
+        <input type="date" id="payDate">
+    </div>
+
+    <div class="checkbox-group">
+        <input type="checkbox" id="isMicroSmall" checked>
+        <label for="isMicroSmall" style="margin:0; cursor:pointer;">
+            Micro/Small Taxpayer? <br>
+            <small>(Sales < ₱20M | Lower Penalties)</small>
+        </label>
+    </div>
+
+    <button onclick="calculatePenalties()">Calculate Total Due</button>
+
+    <div class="results" id="resultsArea" style="display: none;">
+        <div class="result-item">
+            <span>Days Late</span>
+            <span id="resDays" class="days-badge">0 days</span>
+        </div>
+        <div class="result-item">
+            <span>Surcharge</span>
+            <span id="resSurcharge">₱0.00</span>
+        </div>
+        <div class="result-item">
+            <span>Interest</span>
+            <span id="resInterest">₱0.00</span>
+        </div>
+        <div class="result-item">
+            <span>Compromise Penalty</span>
+            <span id="resCompromise">₱0.00</span>
+        </div>
+        <div class="result-item total">
+            <span>Total Amount Due</span>
+            <span id="resTotal">₱0.00</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculatePenalties() {
+        // 1. Get Inputs
+        const taxDue = parseFloat(document.getElementById('taxDue').value) || 0;
+        const dueDate = new Date(document.getElementById('dueDate').value);
+        const payDate = new Date(document.getElementById('payDate').value);
+        const isMicroSmall = document.getElementById('isMicroSmall').checked;
+
+        if (isNaN(dueDate.getTime()) || isNaN(payDate.getTime())) {
+            alert("Please select valid dates.");
+            return;
+        }
+
+        // 2. Calculate Days Late
+        const diffTime = payDate - dueDate;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const daysLate = diffDays > 0 ? diffDays : 0;
+
+        // 3. Logic Constants (EOPT Law)
+        const surchargeRate = isMicroSmall ? 0.10 : 0.25;
+        const interestRate = isMicroSmall ? 0.06 : 0.12;
+
+        // 4. Calculations
+        const surcharge = taxDue * surchargeRate;
+        
+        // Interest: Due * Rate * (Days / 365)
+        const interest = daysLate > 0 ? (taxDue * interestRate * (daysLate / 365)) : 0;
+
+        // 5. Compromise Penalty Table (RMO 7-2015)
+        let compromise = 0;
+        if (taxDue > 0 && taxDue <= 5000) compromise = 1000;
+        else if (taxDue <= 10000) compromise = 3000;
+        else if (taxDue <= 20000) compromise = 5000;
+        else if (taxDue <= 50000) compromise = 10000;
+        else if (taxDue <= 100000) compromise = 15000;
+        else if (taxDue <= 500000) compromise = 20000;
+        else if (taxDue <= 1000000) compromise = 30000;
+        else if (taxDue > 1000000) compromise = 50000;
+        else if (taxDue == 0) compromise = 1000; // Late filing even with zero tax
+
+        // Apply EOPT 50% reduction for Micro/Small
+        if (isMicroSmall) {
+            compromise = compromise * 0.5;
+        }
+
+        // Final Total
+        const totalAmount = taxDue + surcharge + interest + compromise;
+
+        // 6. Display Results
+        document.getElementById('resultsArea').style.display = 'block';
+        document.getElementById('resDays').innerText = `${daysLate} day(s) late`;
+        document.getElementById('resSurcharge').innerText = formatCurrency(surcharge);
+        document.getElementById('resInterest').innerText = formatCurrency(interest);
+        document.getElementById('resCompromise').innerText = formatCurrency(compromise);
+        document.getElementById('resTotal').innerText = formatCurrency(totalAmount);
+    }
+
+    function formatCurrency(num) {
+        return '₱' + num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+</script>
+
+</body>
+</html>
