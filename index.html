@@ -3,256 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BIR Late Filing Calculator</title>
-    <!-- Inter Font for a modern look -->
+    <title>BIR All-in-One Penalty Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-blue: #2563eb;
-            --bg-gray: #f8fafc;
-            --text-dark: #1e293b;
-            --border-color: #e2e8f0;
-            --white: #ffffff;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-gray);
-            color: var(--text-dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            background: var(--white);
-            width: 100%;
-            max-width: 450px;
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-        }
-
-        h2 {
-            margin-top: 0;
-            font-weight: 600;
-            color: var(--primary-blue);
-            font-size: 1.5rem;
-            text-align: center;
-        }
-
-        p.subtitle {
-            text-align: center;
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
-
-        label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #eff6ff;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-
-        .checkbox-group input {
-            width: auto;
-        }
-
-        button {
-            width: 100%;
-            padding: 1rem;
-            background-color: var(--primary-blue);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        .results {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.75rem;
-            font-size: 0.95rem;
-        }
-
-        .result-item.total {
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: var(--primary-blue);
-            margin-top: 1rem;
-        }
-
-        .days-badge {
-            font-size: 0.75rem;
-            background: #fee2e2;
-            color: #b91c1c;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-weight: 600;
-        }
+        :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; --border: #e2e8f0; --white: #ffffff; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; }
+        .container { background: var(--white); width: 100%; max-width: 500px; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h2 { margin: 0; color: var(--primary); font-size: 1.4rem; text-align: center; }
+        p.subtitle { text-align: center; font-size: 0.8rem; color: #64748b; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; }
+        input, select { width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; background: #eff6ff; padding: 12px; border-radius: 8px; margin: 1rem 0; cursor: pointer; }
+        .checkbox-group input { width: auto; }
+        button { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .results { margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid var(--bg); }
+        .res-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .total-row { border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem; font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+        .hidden { display: none; }
+        .badge { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>BIR Tax Calculator</h2>
-    <p class="subtitle">Late Filing & Penalty (EOPT Compliant)</p>
+    <h2>BIR Penalty Calculator</h2>
+    <p class="subtitle">EOPT Act Compliant (2024-2026)</p>
 
+    <!-- Violation Type -->
     <div class="form-group">
-        <label>Tax Due Amount (PHP)</label>
-        <input type="number" id="taxDue" placeholder="0.00">
+        <label>Violation Category</label>
+        <select id="category" onchange="toggleFields()">
+            <option value="late_filing">Late Filing (Tax Return)</option>
+            <option value="info_return">Information Return (Alphalist/SLSP/SAWT)</option>
+            <option value="registration">Registration/Books Violation</option>
+        </select>
     </div>
 
-    <div class="form-group">
-        <label>Due Date</label>
-        <input type="date" id="dueDate">
+    <!-- Tax Return Sub-fields -->
+    <div id="taxReturnFields">
+        <div class="form-group">
+            <label>Return Type</label>
+            <select id="returnType" onchange="toggleFields()">
+                <option value="others">VAT, Percentage, Withholding, etc.</option>
+                <option value="itr">Income Tax Return (ITR)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Tax Due Amount (PHP)</label>
+            <input type="number" id="taxDue" value="0" oninput="toggleFields()">
+        </div>
+
+        <!-- Only shows if ITR and Tax Due is 0 -->
+        <div class="form-group hidden" id="salesField">
+            <label>Gross Sales/Earnings (Annual)</label>
+            <input type="number" id="grossSales" placeholder="Enter annual sales">
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex:1">
+                <label>Due Date</label>
+                <input type="date" id="dueDate">
+            </div>
+            <div class="form-group" style="flex:1">
+                <label>Payment Date</label>
+                <input type="date" id="payDate">
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Date of Payment</label>
-        <input type="date" id="payDate">
-    </div>
-
+    <!-- Micro/Small Toggle -->
     <div class="checkbox-group">
         <input type="checkbox" id="isMicroSmall" checked>
-        <label for="isMicroSmall" style="margin:0; cursor:pointer;">
-            Micro/Small Taxpayer? <br>
-            <small>(Sales < ₱20M | Lower Penalties)</small>
-        </label>
+        <label for="isMicroSmall">Micro/Small Taxpayer? <span class="badge">50% Discount Applied</span></label>
     </div>
 
-    <button onclick="calculatePenalties()">Calculate Total Due</button>
+    <button onclick="calculate()">Calculate Penalty</button>
 
-    <div class="results" id="resultsArea" style="display: none;">
-        <div class="result-item">
-            <span>Days Late</span>
-            <span id="resDays" class="days-badge">0 days</span>
-        </div>
-        <div class="result-item">
-            <span>Surcharge</span>
-            <span id="resSurcharge">₱0.00</span>
-        </div>
-        <div class="result-item">
-            <span>Interest</span>
-            <span id="resInterest">₱0.00</span>
-        </div>
-        <div class="result-item">
-            <span>Compromise Penalty</span>
-            <span id="resCompromise">₱0.00</span>
-        </div>
-        <div class="result-item total">
-            <span>Total Amount Due</span>
-            <span id="resTotal">₱0.00</span>
-        </div>
+    <div class="results hidden" id="resultsArea">
+        <div class="res-row"><span>Surcharge</span><span id="resSurcharge">₱0.00</span></div>
+        <div class="res-row"><span>Interest</span><span id="resInterest">₱0.00</span></div>
+        <div class="res-row"><span>Compromise</span><span id="resCompromise">₱0.00</span></div>
+        <div class="res-row total-row"><span>Total Penalty</span><span id="resTotal">₱0.00</span></div>
+        <p id="daysLabel" style="font-size: 0.75rem; color: #64748b; margin-top: 10px;"></p>
     </div>
 </div>
 
 <script>
-    function calculatePenalties() {
-        // 1. Get Inputs
+    function toggleFields() {
+        const category = document.getElementById('category').value;
+        const returnType = document.getElementById('returnType').value;
         const taxDue = parseFloat(document.getElementById('taxDue').value) || 0;
-        const dueDate = new Date(document.getElementById('dueDate').value);
-        const payDate = new Date(document.getElementById('payDate').value);
-        const isMicroSmall = document.getElementById('isMicroSmall').checked;
-
-        if (isNaN(dueDate.getTime()) || isNaN(payDate.getTime())) {
-            alert("Please select valid dates.");
-            return;
-        }
-
-        // 2. Calculate Days Late
-        const diffTime = payDate - dueDate;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        const daysLate = diffDays > 0 ? diffDays : 0;
-
-        // 3. Logic Constants (EOPT Law)
-        const surchargeRate = isMicroSmall ? 0.10 : 0.25;
-        const interestRate = isMicroSmall ? 0.06 : 0.12;
-
-        // 4. Calculations
-        const surcharge = taxDue * surchargeRate;
         
-        // Interest: Due * Rate * (Days / 365)
-        const interest = daysLate > 0 ? (taxDue * interestRate * (daysLate / 365)) : 0;
-
-        // 5. Compromise Penalty Table (RMO 7-2015)
-        let compromise = 0;
-        if (taxDue > 0 && taxDue <= 5000) compromise = 1000;
-        else if (taxDue <= 10000) compromise = 3000;
-        else if (taxDue <= 20000) compromise = 5000;
-        else if (taxDue <= 50000) compromise = 10000;
-        else if (taxDue <= 100000) compromise = 15000;
-        else if (taxDue <= 500000) compromise = 20000;
-        else if (taxDue <= 1000000) compromise = 30000;
-        else if (taxDue > 1000000) compromise = 50000;
-        else if (taxDue == 0) compromise = 1000; // Late filing even with zero tax
-
-        // Apply EOPT 50% reduction for Micro/Small
-        if (isMicroSmall) {
-            compromise = compromise * 0.5;
-        }
-
-        // Final Total
-        const totalAmount = taxDue + surcharge + interest + compromise;
-
-        // 6. Display Results
-        document.getElementById('resultsArea').style.display = 'block';
-        document.getElementById('resDays').innerText = `${daysLate} day(s) late`;
-        document.getElementById('resSurcharge').innerText = formatCurrency(surcharge);
-        document.getElementById('resInterest').innerText = formatCurrency(interest);
-        document.getElementById('resCompromise').innerText = formatCurrency(compromise);
-        document.getElementById('resTotal').innerText = formatCurrency(totalAmount);
+        // Show/Hide Tax Return section
+        document.getElementById('taxReturnFields').classList.toggle('hidden', category !== 'late_filing');
+        
+        // Show Gross Sales field if ITR and Tax Due is 0
+        const showSales = (category === 'late_filing' && returnType === 'itr' && taxDue <= 0);
+        document.getElementById('salesField').classList.toggle('hidden', !showSales);
     }
 
-    function formatCurrency(num) {
-        return '₱' + num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    function calculate() {
+        const category = document.getElementById('category').value;
+        const isMicroSmall = document.getElementById('isMicroSmall').checked;
+        
+        let surcharge = 0, interest = 0, compromise = 0, daysLate = 0;
+
+        if (category === 'late_filing') {
+            const taxDue = parseFloat(document.getElementById('taxDue').value) || 0;
+            const dueDate = new Date(document.getElementById('dueDate').value);
+            const payDate = new Date(document.getElementById('payDate').value);
+            const returnType = document.getElementById('returnType').value;
+            const grossSales = parseFloat(document.getElementById('grossSales').value) || 0;
+
+            // Days Calculation
+            if (!isNaN(dueDate) && !isNaN(payDate)) {
+                daysLate = Math.ceil((payDate - dueDate) / (1000 * 60 * 60 * 24));
+                if (daysLate < 0) daysLate = 0;
+            }
+
+            // Surcharge & Interest
+            if (taxDue > 0) {
+                surcharge = isMicroSmall ? taxDue * 0.10 : taxDue * 0.25;
+                const intRate = isMicroSmall ? 0.06 : 0.12;
+                interest = taxDue * intRate * (daysLate / 365);
+            }
+
+            // Compromise Logic
+            if (taxDue > 0) {
+                // Standard Table
+                if (taxDue <= 5000) compromise = 1000;
+                else if (taxDue <= 10000) compromise = 3000;
+                else if (taxDue <= 20000) compromise = 5000;
+                else if (taxDue <= 50000) compromise = 10000;
+                else if (taxDue <= 100000) compromise = 15000;
+                else if (taxDue <= 500000) compromise = 20000;
+                else if (taxDue <= 1000000) compromise = 30000;
+                else compromise = 50000;
+            } else {
+                // Zero Tax Due Logic
+                if (returnType === 'itr') {
+                    // ITR Zero Tax based on Sales (RMO 7-2015)
+                    if (grossSales <= 1000000) compromise = 1000;
+                    else if (grossSales <= 5000000) compromise = 5000;
+                    else if (grossSales <= 10000000) compromise = 10000;
+                    else compromise = 25000;
+                } else {
+                    compromise = 1000; // Flat for VAT/PT/etc with zero tax
+                }
+            }
+        } 
+        else if (category === 'info_return') {
+            compromise = 1000; // Standard for Alphalists per return
+        } 
+        else if (category === 'registration') {
+            compromise = 1000; // Standard for Books/COR
+        }
+
+        // Apply EOPT 50% Discount for Micro/Small on Compromise
+        if (isMicroSmall) compromise = compromise * 0.5;
+
+        // Display
+        document.getElementById('resultsArea').classList.remove('hidden');
+        document.getElementById('resSurcharge').innerText = formatPHP(surcharge);
+        document.getElementById('resInterest').innerText = formatPHP(interest);
+        document.getElementById('resCompromise').innerText = formatPHP(compromise);
+        document.getElementById('resTotal').innerText = formatPHP(surcharge + interest + compromise);
+        document.getElementById('daysLabel').innerText = daysLate > 0 ? `Computed based on ${daysLate} days delay.` : "";
+    }
+
+    function formatPHP(v) {
+        return '₱' + v.toLocaleString(undefined, {minimumFractionDigits: 2});
     }
 </script>
-
 </body>
 </html>
